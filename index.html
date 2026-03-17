@@ -641,13 +641,15 @@
                 exercises: [
                     { id: 'deadlift', name: 'Deadlift', sets: 1, reps: '4-6', isRPT: false },
                     { id: 'barbellRow', name: 'Barbell Row', sets: 2, reps: '6-8 top, 8-10 drop', isRPT: true },
-                    { id: 'accessory', name: 'Accessory (Curls/Abs)', sets: 2, reps: '8-12', isRPT: false }
+                    { id: 'barbellCurl', name: 'Barbell Curls', sets: 2, reps: '8-12', isRPT: false },
+                    { id: 'abs', name: 'Ab Work (Planks/Leg Raises)', sets: 2, reps: '8-12 or 30-60sec', isRPT: false }
                 ]
             },
             B: {
                 name: 'Workout B - Push/Legs',
                 exercises: [
-                    { id: 'benchPress', name: 'Bench Press or OHP', sets: 2, reps: '6-8 top, 8-10 drop', isRPT: true },
+                    { id: 'benchPress', name: 'Bench Press', sets: 2, reps: '6-8 top, 8-10 drop', isRPT: true, alternateWith: 'ohp' },
+                    { id: 'ohp', name: 'Overhead Press (OHP)', sets: 2, reps: '6-8 top, 8-10 drop', isRPT: true, alternateWith: 'benchPress' },
                     { id: 'weightedChins', name: 'Weighted Chin-ups', sets: 2, reps: '6-8 top, 8-10 drop', isRPT: true },
                     { id: 'squat', name: 'Squat or Leg Press', sets: 2, reps: '6-8 top, 8-10 drop', isRPT: true }
                 ]
@@ -656,10 +658,10 @@
 
         let workoutData = {};
 
-        Object.keys(workoutPrograms).forEach(workoutKey => {
-            workoutPrograms[workoutKey].exercises.forEach(ex => {
-                workoutData[ex.id] = { sessions: [] };
-            });
+        // Initialize data structure for all exercises
+        const allExercises = ['deadlift', 'barbellRow', 'barbellCurl', 'abs', 'benchPress', 'ohp', 'weightedChins', 'squat'];
+        allExercises.forEach(exId => {
+            workoutData[exId] = { sessions: [] };
         });
 
         function loadData() {
@@ -795,11 +797,15 @@
             }
             
             // Set 1: Top set
-            addRPTSet(1, topSetWeight, 6, 'Top Set');
+            addRPTSet(1, topSetWeight, 6, 'Top Set', true);
             
             // Set 2: -10% weight, +2 reps
             const set2Weight = Math.round(topSetWeight * 0.9 * 2) / 2;
-            addRPTSet(2, set2Weight, 8, 'RPT Drop (-10%)');
+            addRPTSet(2, set2Weight, 8, 'RPT Drop (-10%)', false);
+            
+            // Update warm-up calculator with top set weight
+            const exercise = findExercise(currentExercise);
+            updateWarmupCalculator(topSetWeight, exercise);
         }
 
         function generateSingleSet(lastTopSet) {
@@ -812,10 +818,14 @@
                 weight += 5;
             }
             
-            addRPTSet(1, weight, 5, 'Single Top Set');
+            addRPTSet(1, weight, 5, 'Single Top Set', true);
+            
+            // Update warm-up calculator
+            const exercise = findExercise(currentExercise);
+            updateWarmupCalculator(weight, exercise);
         }
 
-        function addRPTSet(setNum, weight, targetReps, label) {
+        function addRPTSet(setNum, weight, targetReps, label, isTopSet) {
             tempSets.push({ weight: weight, reps: 0 });
             
             const container = document.getElementById('setInputs');
@@ -834,6 +844,12 @@
             setRow.querySelectorAll('input').forEach(input => {
                 input.addEventListener('change', (e) => {
                     updateTempSets(e);
+                    
+                    // If top set weight changes, update warm-up calculator
+                    if (isTopSet && input.dataset.field === 'weight') {
+                        const exercise = findExercise(currentExercise);
+                        updateWarmupCalculator(parseFloat(input.value), exercise);
+                    }
                 });
             });
         }
@@ -847,15 +863,120 @@
             
             updateStats();
             
-            // If reps entered, start rest timer (3-5 min for RPT)
+            // Start rest timer after ANY set when reps are entered
             if (field === 'reps' && value > 0 && tempSets[setIndex].weight > 0) {
                 const exercise = findExercise(currentExercise);
                 const totalSets = exercise.sets;
                 const completedSets = tempSets.filter(s => s.reps > 0).length;
                 
-                if (completedSets < totalSets) {
-                    startRestTimer(180, completedSets, totalSets); // 3 minutes rest
+                // Determine rest duration based on exercise type
+                let restDuration;
+                if (exercise.isRPT || isCompoundExercise(exercise.name)) {
+                    restDuration = 180; // 3 minutes for compounds/RPT
+                } else {
+                    restDuration = 60; // 1 minute for isolation
                 }
+                
+                // Only start timer if not the final set
+                if (completedSets < totalSets) {
+                    startRestTimer(restDuration, completedSets, totalSets);
+                } else {
+                    // Last set of current exercise - check if it's last exercise in workout
+                    checkWorkoutCompletion();
+                }
+            }
+        }
+
+        function checkWorkoutCompletion() {
+            if (!currentWorkout || !currentExercise) return;
+            
+            const workout = workoutPrograms[currentWorkout];
+            const exercises = workout.exercises;
+            const currentExerciseIndex = exercises.findIndex(ex => ex.id === currentExercise);
+            
+            // Check if all exercises in this workout have been logged today
+            const today = new Date().toDateString();
+            let completedExercises = 0;
+            
+            exercises.forEach(ex => {
+                const sessions = workoutData[ex.id].sessions;
+                if (sessions.length > 0) {
+                    const lastSession = sessions[sessions.length - 1];
+                    const sessionDate = new Date(lastSession.date).toDateString();
+                    if (sessionDate === today) {
+                        completedExercises++;
+                    }
+                }
+            });
+            
+            // If this was the last exercise
+            if (completedExercises === exercises.length) {
+                showWorkoutCompletionMessage();
+            }
+        }
+
+        function showWorkoutCompletionMessage() {
+            const workout = workoutPrograms[currentWorkout];
+            
+            // Create completion overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            overlay.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a1a1a 0%, #dc2626 100%); padding: 40px; border-radius: 12px; text-align: center; color: white; max-width: 500px;">
+                    <div style="font-size: 3em; margin-bottom: 20px;">💪</div>
+                    <h2 style="color: white; border: none; font-size: 2em; margin-bottom: 15px;">Workout Complete!</h2>
+                    <p style="font-size: 1.2em; margin-bottom: 10px;">${workout.name}</p>
+                    <p style="font-size: 0.9em; opacity: 0.9; margin-bottom: 30px;">
+                        Great work. Your body adapts during rest.<br>
+                        Next: Break your fast with your post-workout meal.
+                    </p>
+                    <button onclick="this.parentElement.parentElement.remove()" style="padding: 15px 40px; background: white; color: #dc2626; border: none; border-radius: 6px; font-size: 1.1em; font-weight: 700; cursor: pointer;">
+                        Done
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            // Play completion sound
+            playWorkoutCompleteSound();
+        }
+
+        function playWorkoutCompleteSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Play two beeps
+                [0, 0.3].forEach(delay => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 1000;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime + delay);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + delay + 0.3);
+                    
+                    oscillator.start(audioContext.currentTime + delay);
+                    oscillator.stop(audioContext.currentTime + delay + 0.3);
+                });
+            } catch (e) {
+                console.log('Audio not supported');
             }
         }
 
@@ -863,12 +984,30 @@
             const container = document.getElementById('progressionGuidance');
             const lastSession = getLastTopSet(exerciseId);
             
+            // Show alternation guidance for bench/OHP
+            let alternationGuidance = '';
+            if (exercise.alternateWith) {
+                const alternateExercise = findExercise(exercise.alternateWith);
+                const lastAlternate = getLastTopSet(exercise.alternateWith);
+                
+                alternationGuidance = `
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                        <strong>⚠️ Berkhan's Protocol: Alternate This Exercise</strong><br>
+                        <span style="font-size: 0.9em; color: #856404;">
+                            Switch between <strong>${exercise.name}</strong> and <strong>${alternateExercise.name}</strong> each Workout B session.
+                            ${lastAlternate ? `<br>Last ${alternateExercise.name} session: ${lastAlternate.weight} lbs × ${lastAlternate.reps} reps` : ''}
+                        </span>
+                    </div>
+                `;
+            }
+            
             if (!lastSession) {
-                container.innerHTML = `
+                container.innerHTML = alternationGuidance + `
                     <div style="background: #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #6b7280;">
                         <strong>First Time: ${exercise.name}</strong><br>
                         <span style="font-size: 0.9em; color: #374151;">Find your working weight for the target rep range. ${exercise.isRPT ? 'Top set should be near maximum effort.' : ''}</span>
                     </div>
+                    <div id="warmupCalculatorDisplay"></div>
                 `;
                 return;
             }
@@ -876,7 +1015,7 @@
             const hitTarget = lastSession.reps >= (exercise.isRPT ? 6 : 5);
             const recommendedWeight = hitTarget ? lastSession.weight + 5 : lastSession.weight;
             
-            container.innerHTML = `
+            container.innerHTML = alternationGuidance + `
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #1a1a1a;">
                     <div style="margin-bottom: 10px;">
                         <strong>Last Top Set:</strong> ${lastSession.weight} lbs × ${lastSession.reps} reps
@@ -890,7 +1029,68 @@
                         </div>
                     </div>
                 </div>
+                <div id="warmupCalculatorDisplay"></div>
             `;
+            
+            // Update warm-up calculator with recommended weight
+            updateWarmupCalculator(recommendedWeight, exercise);
+        }
+
+        function isCompoundExercise(exerciseName) {
+            const compounds = ['deadlift', 'squat', 'bench', 'press', 'row', 'chin'];
+            const name = exerciseName.toLowerCase();
+            return compounds.some(compound => name.includes(compound));
+        }
+
+        function updateWarmupCalculator(workingWeight, exercise) {
+            const displayDiv = document.getElementById('warmupCalculatorDisplay');
+            
+            if (!displayDiv) return;
+            
+            if (!workingWeight || workingWeight <= 0) {
+                displayDiv.innerHTML = `
+                    <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #9ca3af;">
+                        <strong>⚠ Warm-up Reminder</strong><br>
+                        <span style="font-size: 0.9em; color: #4b5563;">
+                            Warm-ups will calculate automatically based on your working weight.
+                        </span>
+                    </div>
+                `;
+                return;
+            }
+            
+            const isCompound = isCompoundExercise(exercise.name);
+            
+            let warmupHTML = `
+                <div style="background: #fee2e2; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #dc2626;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong>🔥 Warm-up Protocol (Working Weight: ${workingWeight} lbs)</strong>
+                        <label style="font-size: 0.9em; cursor: pointer;">
+                            <input type="checkbox" id="warmupCheck" style="margin-right: 5px; transform: scale(1.2);">
+                            Completed
+                        </label>
+                    </div>
+            `;
+            
+            if (isCompound) {
+                warmupHTML += `
+                    <div style="font-size: 0.9em; color: #991b1b; line-height: 1.8;">
+                        <div>• Empty bar × 10-12 reps (movement prep)</div>
+                        <div>• ${Math.round(workingWeight * 0.5 * 2) / 2} lbs (50%) × 8 reps</div>
+                        <div>• ${Math.round(workingWeight * 0.75 * 2) / 2} lbs (75%) × 5 reps</div>
+                        <div>• ${Math.round(workingWeight * 0.9 * 2) / 2} lbs (90%) × 2-3 reps</div>
+                    </div>
+                `;
+            } else {
+                warmupHTML += `
+                    <div style="font-size: 0.9em; color: #991b1b; line-height: 1.8;">
+                        <div>• ${Math.round(workingWeight * 0.5 * 2) / 2} lbs (50%) × 10 reps</div>
+                    </div>
+                `;
+            }
+            
+            warmupHTML += '</div>';
+            displayDiv.innerHTML = warmupHTML;
         }
 
         function saveIndividualSet(setIndex) {
@@ -948,6 +1148,9 @@
             saveData();
             
             alert(`Exercise logged! Top set: ${validSets[0].weight} lbs × ${validSets[0].reps} reps`);
+            
+            // Check if workout is complete
+            checkWorkoutCompletion();
             
             tempSets = [];
             document.getElementById('setInputs').innerHTML = '';
