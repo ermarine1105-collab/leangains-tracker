@@ -1,0 +1,1572 @@
+[index.html](https://github.com/user-attachments/files/26068759/index.html)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leangains Protocol Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .banner {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            font-size: 1.05em;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #dc2626;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .tab-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            padding: 15px;
+            background: #f0f0f0;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .tab-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .tab-btn.active {
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .workout-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .workout-btn {
+            padding: 20px;
+            background: #f0f0f0;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .workout-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .workout-btn.active {
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .workout-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .workout-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .exercise-list {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .exercise-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #dc2626;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .exercise-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .exercise-item.active {
+            background: #dc2626;
+            color: white;
+        }
+
+        .exercise-name {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .exercise-details {
+            font-size: 0.85em;
+            opacity: 0.7;
+            margin-top: 3px;
+        }
+
+        .set-row {
+            display: grid;
+            grid-template-columns: auto 100px 80px auto;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .set-row input {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #991b1b;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #1a1a1a 0%, #dc2626 100%);
+            padding: 20px;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        .rest-timer {
+            background: linear-gradient(135deg, #1a1a1a 0%, #dc2626 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .rest-timer.complete {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .rest-timer-display {
+            font-size: 3em;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .rest-timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .rest-timer-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .rest-timer-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .fasting-timer {
+            background: linear-gradient(135deg, #991b1b 0%, #1a1a1a 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .fasting-timer-display {
+            font-size: 4em;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+
+        .fasting-status {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .macro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .macro-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #dc2626;
+        }
+
+        .macro-card h3 {
+            margin-top: 0;
+            color: #dc2626;
+        }
+
+        .macro-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .macro-item:last-child {
+            border-bottom: none;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .set-row {
+                grid-template-columns: 1fr;
+            }
+
+            .tab-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .history-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #dc2626;
+        }
+
+        .history-date {
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .history-exercise {
+            color: #333;
+            font-weight: 600;
+            margin-top: 8px;
+            margin-bottom: 3px;
+        }
+
+        .history-sets {
+            color: #666;
+            font-size: 0.85em;
+            margin-left: 15px;
+        }
+
+        .history-delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .history-delete-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Leangains Protocol</h1>
+        
+        <div class="banner">
+            16/8 Fasting • Reverse Pyramid Training • Macro Cycling
+        </div>
+
+        <div class="card">
+            <div class="tab-selector">
+                <button class="tab-btn active" onclick="showTab('training')">Training</button>
+                <button class="tab-btn" onclick="showTab('fasting')">Fasting</button>
+                <button class="tab-btn" onclick="showTab('nutrition')">Nutrition</button>
+            </div>
+        </div>
+
+        <!-- TRAINING TAB -->
+        <div id="trainingTab" class="tab-content">
+            <div class="card">
+                <h2>Select Workout</h2>
+                <div class="workout-selector">
+                    <div class="workout-btn" onclick="selectWorkout('A')">
+                        <div class="workout-title">Workout A</div>
+                        <div class="workout-desc">Deadlift • Rows • Accessory</div>
+                    </div>
+                    <div class="workout-btn" onclick="selectWorkout('B')">
+                        <div class="workout-title">Workout B</div>
+                        <div class="workout-desc">Bench/OHP • Chins • Squat</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="exerciseSection" style="display: none;">
+                <div class="card">
+                    <h2 id="workoutTitle">Exercises</h2>
+                    <div id="exerciseList" class="exercise-list"></div>
+                </div>
+            </div>
+
+            <div id="loggingSection" style="display: none;">
+                <div class="card">
+                    <h2 id="exerciseTitle">Exercise</h2>
+                    
+                    <div id="restTimerContainer" style="display: none;"></div>
+                    
+                    <div id="progressionGuidance"></div>
+                    
+                    <div id="setInputs"></div>
+                    
+                    <button class="btn" onclick="logExercise()" style="width: 100%; margin-top: 15px; padding: 15px; font-size: 1.1em;">
+                        Save Exercise
+                    </button>
+
+                    <div class="stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Top Set Weight</div>
+                            <div class="stat-value" id="statTopSet">—</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Last Top Set</div>
+                            <div class="stat-value" id="statLastTopSet">—</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Progress</div>
+                            <div class="stat-value" id="statProgress">—</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="progressSection" style="display: none;">
+                <div class="card">
+                    <h2>Top Set Progress</h2>
+                    <div style="position: relative; height: 400px; margin-top: 20px;">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Workout History</h2>
+                    <div id="historyLog" style="max-height: 500px; overflow-y: auto; margin-top: 20px;">
+                        <p style="color: #999; text-align: center;">No workouts logged yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FASTING TAB -->
+        <div id="fastingTab" class="tab-content" style="display: none;">
+            <div class="card">
+                <h2>16/8 Intermittent Fasting</h2>
+                
+                <div id="fastingTimerDisplay" class="fasting-timer">
+                    <div class="fasting-status" id="fastingStatus">Set your fasting window</div>
+                    <div class="fasting-timer-display" id="fastingCountdown">--:--:--</div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn" onclick="startFast()">Start 16hr Fast</button>
+                        <button class="btn btn-secondary" onclick="stopFast()" style="margin-left: 10px;">Reset</button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                    <h3>Berkhan's Fasting Protocol</h3>
+                    <ul style="line-height: 2; margin-left: 20px;">
+                        <li><strong>Fast:</strong> 16 hours (typically 8pm - 12pm next day)</li>
+                        <li><strong>Feed:</strong> 8 hour window (12pm - 8pm)</li>
+                        <li><strong>Pre-workout:</strong> Train fasted or 10g BCAAs</li>
+                        <li><strong>Post-workout:</strong> First meal (largest of the day)</li>
+                        <li><strong>Meal timing:</strong> 2-3 meals in feeding window</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUTRITION TAB -->
+        <div id="nutritionTab" class="tab-content" style="display: none;">
+            <div class="card">
+                <h2>Macro Calculator</h2>
+                
+                <div class="input-group">
+                    <label>Total Bodyweight (lbs)</label>
+                    <input type="number" id="bodyweight" placeholder="Enter total bodyweight">
+                </div>
+
+                <div class="input-group">
+                    <label>Body Fat Percentage (%)</label>
+                    <input type="number" id="bodyfat" placeholder="Enter body fat %" step="0.1">
+                </div>
+
+                <div class="input-group">
+                    <label>Goal</label>
+                    <select id="goal" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;">
+                        <option value="cut">Cut (Fat Loss) - Recommended >15% BF</option>
+                        <option value="recomp">Recomp (Maintenance) - Best at 10-15% BF</option>
+                        <option value="bulk">Bulk (Muscle Gain) - Best at <12% BF</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="calculateMacros()">Calculate Macros</button>
+
+                <div id="lbmDisplay" style="display: none; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #dc2626;">
+                    <strong>Calculated Lean Body Mass:</strong> <span id="lbmValue"></span> lbs
+                </div>
+
+                <div id="macroResults" style="display: none;">
+                    <div class="macro-grid">
+                        <div class="macro-card">
+                            <h3>Training Days</h3>
+                            <div class="macro-item">
+                                <span>Calories</span>
+                                <strong id="trainCalories">—</strong>
+                            </div>
+                            <div class="macro-item">
+                                <span>Protein</span>
+                                <strong id="trainProtein">—</strong>
+                            </div>
+                            <div class="macro-item">
+                                <span>Carbs</span>
+                                <strong id="trainCarbs">—</strong>
+                            </div>
+                            <div class="macro-item">
+                                <span>Fat</span>
+                                <strong id="trainFat">—</strong>
+                            </div>
+                        </div>
+
+                        <div class="macro-card">
+                            <h3>Rest Days</h3>
+                            <div class="macro-item">
+                                <span>Calories</span>
+                                <strong id="restCalories">—</strong>
+                            </div>
+                            <div class="macro-item">
+                                <span>Protein</span>
+                                <strong id="restProtein">—</strong>
+                            </div>
+                            <div class="macro-item">
+                                <span>Carbs</span>
+                                <strong id="restCarbs">—</strong>
+                            </div>
+                            <div class="macro-item">
+                                <span>Fat</span>
+                                <strong id="restFat">—</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                        <h3>Berkhan's Macro Cycling Guidelines</h3>
+                        <ul style="line-height: 2; margin-left: 20px;">
+                            <li><strong>KEY:</strong> All calculations based on LEAN BODY MASS, not total weight</li>
+                            <li><strong>Protein:</strong> 1g per lb of LBM daily (constant on all days)</li>
+                            <li><strong>Training days:</strong> High carb (50-60% cals), low fat (20%)</li>
+                            <li><strong>Rest days:</strong> Low carb (20-30% cals), higher fat (40-50%)</li>
+                            <li><strong>Cut (>15% BF):</strong> 14× LBM training, 10× LBM rest = ~1 lb/week loss</li>
+                            <li><strong>Recomp (10-15% BF):</strong> 16× LBM training, 12× LBM rest = maintenance</li>
+                            <li><strong>Post-workout meal:</strong> 40-50% of daily calories (break fast here)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentWorkout = null;
+        let currentExercise = null;
+        let tempSets = [];
+        let restTimerInterval = null;
+        let restTimeRemaining = 0;
+        let fastingInterval = null;
+        let fastEndTime = null;
+        let chart = null;
+
+        const workoutPrograms = {
+            A: {
+                name: 'Workout A - Pull Focus',
+                exercises: [
+                    { id: 'deadlift', name: 'Deadlift', sets: 1, reps: '4-6', isRPT: false },
+                    { id: 'barbellRow', name: 'Barbell Row', sets: 2, reps: '6-8 top, 8-10 drop', isRPT: true },
+                    { id: 'barbellCurl', name: 'Barbell Curls', sets: 2, reps: '8-12', isRPT: false },
+                    { id: 'abs', name: 'Ab Work (Planks/Leg Raises)', sets: 2, reps: '8-12 or 30-60sec', isRPT: false }
+                ]
+            },
+            B: {
+                name: 'Workout B - Push/Legs',
+                exercises: [
+                    { id: 'benchPress', name: 'Bench Press', sets: 2, reps: '6-8 top, 8-10 drop', isRPT: true, alternateWith: 'ohp' },
+                    { id: 'ohp', name: 'Overhead Press (OHP)', sets: 2, reps: '6-8 top, 8-10 drop', isRPT: true, alternateWith: 'benchPress' },
+                    { id: 'weightedChins', name: 'Weighted Chin-ups', sets: 2, reps: '6-8 top, 8-10 drop', isRPT: true },
+                    { id: 'squat', name: 'Squat or Leg Press', sets: 2, reps: '6-8 top, 8-10 drop', isRPT: true }
+                ]
+            }
+        };
+
+        let workoutData = {};
+
+        // Initialize data structure for all exercises
+        const allExercises = ['deadlift', 'barbellRow', 'barbellCurl', 'abs', 'benchPress', 'ohp', 'weightedChins', 'squat'];
+        allExercises.forEach(exId => {
+            workoutData[exId] = { sessions: [] };
+        });
+
+        function loadData() {
+            const saved = localStorage.getItem('leangainsTrackerData');
+            if (saved) {
+                workoutData = JSON.parse(saved);
+            }
+            
+            const savedBodyweight = localStorage.getItem('bodyweight');
+            if (savedBodyweight) {
+                document.getElementById('bodyweight').value = savedBodyweight;
+            }
+
+            const savedBodyfat = localStorage.getItem('bodyfat');
+            if (savedBodyfat) {
+                document.getElementById('bodyfat').value = savedBodyfat;
+            }
+
+            const savedFastEnd = localStorage.getItem('fastEndTime');
+            if (savedFastEnd) {
+                fastEndTime = parseInt(savedFastEnd);
+                updateFastingTimer();
+                if (!fastingInterval) {
+                    fastingInterval = setInterval(updateFastingTimer, 1000);
+                }
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('leangainsTrackerData', JSON.stringify(workoutData));
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('trainingTab').style.display = 'none';
+            document.getElementById('fastingTab').style.display = 'none';
+            document.getElementById('nutritionTab').style.display = 'none';
+
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+        }
+
+        function selectWorkout(workoutKey) {
+            currentWorkout = workoutKey;
+            currentExercise = null;
+            
+            document.querySelectorAll('.workout-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.workout-btn').classList.add('active');
+            
+            const workout = workoutPrograms[workoutKey];
+            document.getElementById('workoutTitle').textContent = workout.name;
+            
+            const exerciseList = document.getElementById('exerciseList');
+            exerciseList.innerHTML = '';
+            
+            workout.exercises.forEach(ex => {
+                const div = document.createElement('div');
+                div.className = 'exercise-item';
+                div.onclick = () => selectExercise(ex.id);
+                div.innerHTML = `
+                    <div>
+                        <div class="exercise-name">${ex.name}</div>
+                        <div class="exercise-details">${ex.sets} set(s) × ${ex.reps} reps ${ex.isRPT ? '(RPT)' : ''}</div>
+                    </div>
+                `;
+                exerciseList.appendChild(div);
+            });
+            
+            document.getElementById('exerciseSection').style.display = 'block';
+            document.getElementById('loggingSection').style.display = 'none';
+        }
+
+        function selectExercise(exerciseId) {
+            currentExercise = exerciseId;
+            tempSets = [];
+            
+            stopRestTimer();
+            document.getElementById('restTimerContainer').style.display = 'none';
+            
+            document.querySelectorAll('.exercise-item').forEach(item => item.classList.remove('active'));
+            event.target.closest('.exercise-item').classList.add('active');
+            
+            const exercise = findExercise(exerciseId);
+            document.getElementById('exerciseTitle').textContent = exercise.name;
+            
+            document.getElementById('loggingSection').style.display = 'block';
+            document.getElementById('progressSection').style.display = 'block';
+            
+            document.getElementById('setInputs').innerHTML = '';
+            
+            displayProgressionGuidance(exerciseId, exercise);
+            
+            const lastTopSet = getLastTopSet(exerciseId);
+            
+            // Generate sets based on RPT or single set
+            if (exercise.isRPT) {
+                generateRPTSets(lastTopSet);
+            } else {
+                generateSingleSet(lastTopSet);
+            }
+            
+            updateStats();
+            updateChart();
+            updateHistory();
+        }
+
+        function findExercise(exerciseId) {
+            for (let workoutKey in workoutPrograms) {
+                const found = workoutPrograms[workoutKey].exercises.find(ex => ex.id === exerciseId);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        function getLastTopSet(exerciseId) {
+            const sessions = workoutData[exerciseId].sessions;
+            if (sessions.length === 0) return null;
+            
+            const lastSession = sessions[sessions.length - 1];
+            return lastSession.sets[0]; // Top set is always first
+        }
+
+        function generateRPTSets(lastTopSet) {
+            const container = document.getElementById('setInputs');
+            
+            let topSetWeight = lastTopSet ? lastTopSet.weight : 0;
+            const targetReps = lastTopSet ? lastTopSet.reps : 6;
+            
+            // If hit target reps last time, recommend +5 lbs
+            if (lastTopSet && lastTopSet.reps >= 6) {
+                topSetWeight += 5;
+            }
+            
+            // Set 1: Top set
+            addRPTSet(1, topSetWeight, 6, 'Top Set', true);
+            
+            // Set 2: -10% weight, +2 reps
+            const set2Weight = Math.round(topSetWeight * 0.9 * 2) / 2;
+            addRPTSet(2, set2Weight, 8, 'RPT Drop (-10%)', false);
+            
+            // Update warm-up calculator with top set weight
+            const exercise = findExercise(currentExercise);
+            updateWarmupCalculator(topSetWeight, exercise);
+        }
+
+        function generateSingleSet(lastTopSet) {
+            const container = document.getElementById('setInputs');
+            
+            let weight = lastTopSet ? lastTopSet.weight : 0;
+            const targetReps = lastTopSet ? lastTopSet.reps : 5;
+            
+            if (lastTopSet && lastTopSet.reps >= 5) {
+                weight += 5;
+            }
+            
+            addRPTSet(1, weight, 5, 'Single Top Set', true);
+            
+            // Update warm-up calculator
+            const exercise = findExercise(currentExercise);
+            updateWarmupCalculator(weight, exercise);
+        }
+
+        function addRPTSet(setNum, weight, targetReps, label, isTopSet) {
+            tempSets.push({ weight: weight, reps: 0 });
+            
+            const container = document.getElementById('setInputs');
+            const setRow = document.createElement('div');
+            setRow.className = 'set-row';
+            setRow.id = `set-${setNum}`;
+            
+            setRow.innerHTML = `
+                <strong>Set ${setNum}: ${label}</strong>
+                <input type="number" value="${weight || ''}" data-set="${setNum-1}" data-field="weight" step="2.5" placeholder="Weight">
+                <input type="number" placeholder="${targetReps} reps" data-set="${setNum-1}" data-field="reps" min="0">
+                <button class="btn btn-secondary" onclick="saveIndividualSet(${setNum-1})" style="padding: 8px 12px; font-size: 0.9em;">Save Set</button>
+            `;
+            container.appendChild(setRow);
+            
+            setRow.querySelectorAll('input').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    updateTempSets(e);
+                    
+                    // If top set weight changes, update warm-up calculator
+                    if (isTopSet && input.dataset.field === 'weight') {
+                        const exercise = findExercise(currentExercise);
+                        updateWarmupCalculator(parseFloat(input.value), exercise);
+                    }
+                });
+            });
+        }
+
+        function updateTempSets(event) {
+            const setIndex = parseInt(event.target.dataset.set);
+            const field = event.target.dataset.field;
+            const value = parseFloat(event.target.value) || 0;
+            
+            tempSets[setIndex][field] = value;
+            
+            updateStats();
+            
+            // Start rest timer after ANY set when reps are entered
+            if (field === 'reps' && value > 0 && tempSets[setIndex].weight > 0) {
+                const exercise = findExercise(currentExercise);
+                const totalSets = exercise.sets;
+                const completedSets = tempSets.filter(s => s.reps > 0).length;
+                
+                // Determine rest duration based on exercise type
+                let restDuration;
+                if (exercise.isRPT || isCompoundExercise(exercise.name)) {
+                    restDuration = 180; // 3 minutes for compounds/RPT
+                } else {
+                    restDuration = 60; // 1 minute for isolation
+                }
+                
+                // Only start timer if not the final set
+                if (completedSets < totalSets) {
+                    startRestTimer(restDuration, completedSets, totalSets);
+                } else {
+                    // Last set of current exercise - check if it's last exercise in workout
+                    checkWorkoutCompletion();
+                }
+            }
+        }
+
+        function checkWorkoutCompletion() {
+            if (!currentWorkout || !currentExercise) return;
+            
+            const workout = workoutPrograms[currentWorkout];
+            const exercises = workout.exercises;
+            const currentExerciseIndex = exercises.findIndex(ex => ex.id === currentExercise);
+            
+            // Check if all exercises in this workout have been logged today
+            const today = new Date().toDateString();
+            let completedExercises = 0;
+            
+            exercises.forEach(ex => {
+                const sessions = workoutData[ex.id].sessions;
+                if (sessions.length > 0) {
+                    const lastSession = sessions[sessions.length - 1];
+                    const sessionDate = new Date(lastSession.date).toDateString();
+                    if (sessionDate === today) {
+                        completedExercises++;
+                    }
+                }
+            });
+            
+            // If this was the last exercise
+            if (completedExercises === exercises.length) {
+                showWorkoutCompletionMessage();
+            }
+        }
+
+        function showWorkoutCompletionMessage() {
+            const workout = workoutPrograms[currentWorkout];
+            
+            // Create completion overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            overlay.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a1a1a 0%, #dc2626 100%); padding: 40px; border-radius: 12px; text-align: center; color: white; max-width: 500px;">
+                    <div style="font-size: 3em; margin-bottom: 20px;">💪</div>
+                    <h2 style="color: white; border: none; font-size: 2em; margin-bottom: 15px;">Workout Complete!</h2>
+                    <p style="font-size: 1.2em; margin-bottom: 10px;">${workout.name}</p>
+                    <p style="font-size: 0.9em; opacity: 0.9; margin-bottom: 30px;">
+                        Great work. Your body adapts during rest.<br>
+                        Next: Break your fast with your post-workout meal.
+                    </p>
+                    <button onclick="this.parentElement.parentElement.remove()" style="padding: 15px 40px; background: white; color: #dc2626; border: none; border-radius: 6px; font-size: 1.1em; font-weight: 700; cursor: pointer;">
+                        Done
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            // Play completion sound
+            playWorkoutCompleteSound();
+        }
+
+        function playWorkoutCompleteSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Play two beeps
+                [0, 0.3].forEach(delay => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 1000;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime + delay);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + delay + 0.3);
+                    
+                    oscillator.start(audioContext.currentTime + delay);
+                    oscillator.stop(audioContext.currentTime + delay + 0.3);
+                });
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        function displayProgressionGuidance(exerciseId, exercise) {
+            const container = document.getElementById('progressionGuidance');
+            const lastSession = getLastTopSet(exerciseId);
+            
+            // Show alternation guidance for bench/OHP
+            let alternationGuidance = '';
+            if (exercise.alternateWith) {
+                const alternateExercise = findExercise(exercise.alternateWith);
+                const lastAlternate = getLastTopSet(exercise.alternateWith);
+                
+                alternationGuidance = `
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                        <strong>⚠️ Berkhan's Protocol: Alternate This Exercise</strong><br>
+                        <span style="font-size: 0.9em; color: #856404;">
+                            Switch between <strong>${exercise.name}</strong> and <strong>${alternateExercise.name}</strong> each Workout B session.
+                            ${lastAlternate ? `<br>Last ${alternateExercise.name} session: ${lastAlternate.weight} lbs × ${lastAlternate.reps} reps` : ''}
+                        </span>
+                    </div>
+                `;
+            }
+            
+            if (!lastSession) {
+                container.innerHTML = alternationGuidance + `
+                    <div style="background: #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #6b7280;">
+                        <strong>First Time: ${exercise.name}</strong><br>
+                        <span style="font-size: 0.9em; color: #374151;">Find your working weight for the target rep range. ${exercise.isRPT ? 'Top set should be near maximum effort.' : ''}</span>
+                    </div>
+                    <div id="warmupCalculatorDisplay"></div>
+                `;
+                return;
+            }
+            
+            const hitTarget = lastSession.reps >= (exercise.isRPT ? 6 : 5);
+            const recommendedWeight = hitTarget ? lastSession.weight + 5 : lastSession.weight;
+            
+            container.innerHTML = alternationGuidance + `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #1a1a1a;">
+                    <div style="margin-bottom: 10px;">
+                        <strong>Last Top Set:</strong> ${lastSession.weight} lbs × ${lastSession.reps} reps
+                    </div>
+                    <div style="background: ${hitTarget ? '#d4edda' : '#fff3cd'}; padding: 12px; border-radius: 6px; margin-top: 10px; border: 2px solid ${hitTarget ? '#28a745' : '#ffc107'};">
+                        <div style="color: ${hitTarget ? '#155724' : '#856404'}; font-weight: 600; margin-bottom: 5px;">
+                            ${hitTarget ? '✓ Hit target reps - add weight' : '⚠ Missed target - repeat weight'}
+                        </div>
+                        <div style="font-size: 0.95em; color: ${hitTarget ? '#155724' : '#856404'};">
+                            <strong>Recommended:</strong> ${recommendedWeight} lbs ${hitTarget ? '(+5 lbs)' : '(same weight)'}
+                        </div>
+                    </div>
+                </div>
+                <div id="warmupCalculatorDisplay"></div>
+            `;
+            
+            // Update warm-up calculator with recommended weight
+            updateWarmupCalculator(recommendedWeight, exercise);
+        }
+
+        function isCompoundExercise(exerciseName) {
+            const compounds = ['deadlift', 'squat', 'bench', 'press', 'row', 'chin'];
+            const name = exerciseName.toLowerCase();
+            return compounds.some(compound => name.includes(compound));
+        }
+
+        function updateWarmupCalculator(workingWeight, exercise) {
+            const displayDiv = document.getElementById('warmupCalculatorDisplay');
+            
+            if (!displayDiv) return;
+            
+            if (!workingWeight || workingWeight <= 0) {
+                displayDiv.innerHTML = `
+                    <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #9ca3af;">
+                        <strong>⚠ Warm-up Reminder</strong><br>
+                        <span style="font-size: 0.9em; color: #4b5563;">
+                            Warm-ups will calculate automatically based on your working weight.
+                        </span>
+                    </div>
+                `;
+                return;
+            }
+            
+            const isCompound = isCompoundExercise(exercise.name);
+            
+            let warmupHTML = `
+                <div style="background: #fee2e2; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #dc2626;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong>🔥 Warm-up Protocol (Working Weight: ${workingWeight} lbs)</strong>
+                        <label style="font-size: 0.9em; cursor: pointer;">
+                            <input type="checkbox" id="warmupCheck" style="margin-right: 5px; transform: scale(1.2);">
+                            Completed
+                        </label>
+                    </div>
+            `;
+            
+            if (isCompound) {
+                warmupHTML += `
+                    <div style="font-size: 0.9em; color: #991b1b; line-height: 1.8;">
+                        <div>• Empty bar × 10-12 reps (movement prep)</div>
+                        <div>• ${Math.round(workingWeight * 0.5 * 2) / 2} lbs (50%) × 8 reps</div>
+                        <div>• ${Math.round(workingWeight * 0.75 * 2) / 2} lbs (75%) × 5 reps</div>
+                        <div>• ${Math.round(workingWeight * 0.9 * 2) / 2} lbs (90%) × 2-3 reps</div>
+                    </div>
+                `;
+            } else {
+                warmupHTML += `
+                    <div style="font-size: 0.9em; color: #991b1b; line-height: 1.8;">
+                        <div>• ${Math.round(workingWeight * 0.5 * 2) / 2} lbs (50%) × 10 reps</div>
+                    </div>
+                `;
+            }
+            
+            warmupHTML += '</div>';
+            displayDiv.innerHTML = warmupHTML;
+        }
+
+        function saveIndividualSet(setIndex) {
+            if (!currentExercise) {
+                alert('No exercise selected');
+                return;
+            }
+
+            const set = tempSets[setIndex];
+            
+            if (!set.weight || set.weight <= 0 || !set.reps || set.reps <= 0) {
+                alert('Please enter valid weight and reps');
+                return;
+            }
+
+            const session = {
+                date: new Date().toISOString(),
+                workout: currentWorkout,
+                sets: [set]
+            };
+
+            workoutData[currentExercise].sessions.push(session);
+            saveData();
+            
+            alert(`Set ${setIndex + 1} saved!\n${set.weight} lbs × ${set.reps} reps`);
+            
+            updateStats();
+            updateChart();
+            updateHistory();
+        }
+
+        function logExercise() {
+            if (!currentExercise) {
+                alert('Please select an exercise');
+                return;
+            }
+            
+            const validSets = tempSets.filter(set => set.weight > 0 && set.reps > 0);
+            
+            if (validSets.length === 0) {
+                alert('Please log at least one set');
+                return;
+            }
+            
+            stopRestTimer();
+            document.getElementById('restTimerContainer').style.display = 'none';
+            
+            const session = {
+                date: new Date().toISOString(),
+                workout: currentWorkout,
+                sets: validSets
+            };
+            
+            workoutData[currentExercise].sessions.push(session);
+            saveData();
+            
+            alert(`Exercise logged! Top set: ${validSets[0].weight} lbs × ${validSets[0].reps} reps`);
+            
+            // Check if workout is complete
+            checkWorkoutCompletion();
+            
+            tempSets = [];
+            document.getElementById('setInputs').innerHTML = '';
+            
+            const exercise = findExercise(currentExercise);
+            displayProgressionGuidance(currentExercise, exercise);
+            
+            const lastTopSet = getLastTopSet(currentExercise);
+            if (exercise.isRPT) {
+                generateRPTSets(lastTopSet);
+            } else {
+                generateSingleSet(lastTopSet);
+            }
+            
+            updateStats();
+            updateChart();
+            updateHistory();
+        }
+
+        function updateStats() {
+            if (!currentExercise) return;
+            
+            const currentTopSet = tempSets[0];
+            const lastTopSet = getLastTopSet(currentExercise);
+            
+            if (currentTopSet && currentTopSet.weight > 0) {
+                document.getElementById('statTopSet').textContent = `${currentTopSet.weight} lbs`;
+            } else {
+                document.getElementById('statTopSet').textContent = '—';
+            }
+            
+            if (lastTopSet) {
+                document.getElementById('statLastTopSet').textContent = `${lastTopSet.weight} lbs × ${lastTopSet.reps}`;
+                
+                if (currentTopSet && currentTopSet.weight > 0 && currentTopSet.reps > 0) {
+                    const change = currentTopSet.weight - lastTopSet.weight;
+                    const changeText = change > 0 ? `+${change} lbs` : change < 0 ? `${change} lbs` : 'Same';
+                    document.getElementById('statProgress').textContent = changeText;
+                } else {
+                    document.getElementById('statProgress').textContent = '—';
+                }
+            } else {
+                document.getElementById('statLastTopSet').textContent = '—';
+                document.getElementById('statProgress').textContent = '—';
+            }
+        }
+
+        function updateChart() {
+            if (!currentExercise) return;
+            
+            const sessions = workoutData[currentExercise].sessions;
+            
+            if (sessions.length === 0) {
+                return;
+            }
+            
+            const labels = sessions.map(s => {
+                const date = new Date(s.date);
+                return `${date.getMonth()+1}/${date.getDate()}`;
+            });
+            
+            const data = sessions.map(s => s.sets[0].weight); // Top set weight
+            
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            const exercise = findExercise(currentExercise);
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `${exercise.name} - Top Set Weight (lbs)`,
+                        data: data,
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Weight (lbs)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateHistory() {
+            const container = document.getElementById('historyLog');
+            
+            // Collect all sessions across all exercises
+            let allSessions = [];
+            Object.keys(workoutData).forEach(exerciseId => {
+                workoutData[exerciseId].sessions.forEach(session => {
+                    const exercise = findExercise(exerciseId);
+                    allSessions.push({
+                        ...session,
+                        exerciseId: exerciseId,
+                        exerciseName: exercise ? exercise.name : exerciseId
+                    });
+                });
+            });
+            
+            if (allSessions.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center;">No workouts logged yet</p>';
+                return;
+            }
+            
+            // Sort by date descending
+            allSessions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            container.innerHTML = '';
+            
+            allSessions.forEach(session => {
+                const date = new Date(session.date);
+                const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                
+                const setsStr = session.sets.map((s, i) => 
+                    `Set ${i+1}: ${s.weight} lbs × ${s.reps} reps`
+                ).join('<br>');
+                
+                const topSet = session.sets[0];
+                
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div class="history-date">${dateStr}</div>
+                    <div class="history-exercise">${session.exerciseName} (Workout ${session.workout})</div>
+                    <div class="history-sets">${setsStr}</div>
+                    <div style="margin-top: 8px; color: #dc2626; font-weight: 600;">Top Set: ${topSet.weight} lbs × ${topSet.reps} reps</div>
+                    <button class="history-delete-btn" onclick="deleteWorkoutSession('${session.exerciseId}', '${session.date}')">Delete</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function deleteWorkoutSession(exerciseId, sessionDate) {
+            if (!confirm('Delete this workout session? This cannot be undone.')) {
+                return;
+            }
+            
+            const exercise = workoutData[exerciseId];
+            if (!exercise) return;
+            
+            const sessionIndex = exercise.sessions.findIndex(s => s.date === sessionDate);
+            if (sessionIndex !== -1) {
+                exercise.sessions.splice(sessionIndex, 1);
+                saveData();
+                
+                updateStats();
+                updateChart();
+                updateHistory();
+                
+                alert('Workout session deleted');
+            }
+        }
+
+        // Rest timer functions (3-5 min for RPT)
+        function startRestTimer(duration, setNumber, totalSets) {
+            if (setNumber >= totalSets) return;
+
+            stopRestTimer();
+            
+            restTimeRemaining = duration;
+            const container = document.getElementById('restTimerContainer');
+            container.style.display = 'block';
+            
+            updateRestTimerDisplay(setNumber, totalSets);
+            
+            restTimerInterval = setInterval(() => {
+                restTimeRemaining--;
+                updateRestTimerDisplay(setNumber, totalSets);
+                
+                if (restTimeRemaining <= 0) {
+                    completeRestTimer();
+                }
+            }, 1000);
+        }
+
+        function updateRestTimerDisplay(setNumber, totalSets) {
+            const container = document.getElementById('restTimerContainer');
+            const minutes = Math.floor(restTimeRemaining / 60);
+            const seconds = restTimeRemaining % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            const isComplete = restTimeRemaining <= 0;
+            
+            container.innerHTML = `
+                <div class="rest-timer ${isComplete ? 'complete' : ''}">
+                    <div style="font-size: 1.1em; opacity: 0.9;">Rest Period (RPT: 3-5 min)</div>
+                    <div class="rest-timer-display">${timeString}</div>
+                    <div style="font-size: 0.9em; opacity: 0.8;">Completed Set ${setNumber} of ${totalSets}</div>
+                    ${!isComplete ? `
+                        <div class="rest-timer-controls">
+                            <button class="rest-timer-btn" onclick="skipRest()">Skip</button>
+                            <button class="rest-timer-btn" onclick="addRestTime()">+30s</button>
+                        </div>
+                    ` : `
+                        <div style="margin-top: 15px; font-size: 1.2em;">✓ Ready for Set ${setNumber + 1}</div>
+                    `}
+                </div>
+            `;
+        }
+
+        function completeRestTimer() {
+            stopRestTimer();
+            playRestCompleteSound();
+        }
+
+        function stopRestTimer() {
+            if (restTimerInterval) {
+                clearInterval(restTimerInterval);
+                restTimerInterval = null;
+            }
+            restTimeRemaining = 0;
+        }
+
+        function skipRest() {
+            document.getElementById('restTimerContainer').style.display = 'none';
+            stopRestTimer();
+        }
+
+        function addRestTime() {
+            restTimeRemaining += 30;
+            const exercise = findExercise(currentExercise);
+            const completedSets = tempSets.filter(s => s.reps > 0).length;
+            updateRestTimerDisplay(completedSets, exercise.sets);
+        }
+
+        function playRestCompleteSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        // Fasting timer functions
+        function startFast() {
+            const now = Date.now();
+            fastEndTime = now + (16 * 60 * 60 * 1000); // 16 hours from now
+            localStorage.setItem('fastEndTime', fastEndTime.toString());
+            
+            if (fastingInterval) {
+                clearInterval(fastingInterval);
+            }
+            
+            fastingInterval = setInterval(updateFastingTimer, 1000);
+            updateFastingTimer();
+        }
+
+        function stopFast() {
+            if (fastingInterval) {
+                clearInterval(fastingInterval);
+                fastingInterval = null;
+            }
+            fastEndTime = null;
+            localStorage.removeItem('fastEndTime');
+            
+            document.getElementById('fastingStatus').textContent = 'Set your fasting window';
+            document.getElementById('fastingCountdown').textContent = '--:--:--';
+        }
+
+        function updateFastingTimer() {
+            if (!fastEndTime) return;
+            
+            const now = Date.now();
+            const remaining = Math.max(0, fastEndTime - now);
+            
+            const hours = Math.floor(remaining / (60 * 60 * 1000));
+            const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+            const seconds = Math.floor((remaining % (60 * 1000)) / 1000);
+            
+            const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('fastingCountdown').textContent = timeString;
+            
+            if (remaining > 0) {
+                const totalHours = 16;
+                const elapsedHours = totalHours - (remaining / (60 * 60 * 1000));
+                document.getElementById('fastingStatus').textContent = `Fasting (${Math.floor(elapsedHours)}/${totalHours} hours)`;
+            } else {
+                document.getElementById('fastingStatus').textContent = '✓ Fast Complete - Feeding Window Open';
+                if (fastingInterval) {
+                    clearInterval(fastingInterval);
+                    fastingInterval = null;
+                }
+            }
+        }
+
+        // Macro calculator
+        function calculateMacros() {
+            const bodyweight = parseFloat(document.getElementById('bodyweight').value);
+            const bodyfat = parseFloat(document.getElementById('bodyfat').value);
+            const goal = document.getElementById('goal').value;
+            
+            if (!bodyweight || bodyweight <= 0) {
+                alert('Please enter valid bodyweight');
+                return;
+            }
+            
+            if (!bodyfat || bodyfat <= 0 || bodyfat >= 100) {
+                alert('Please enter valid body fat percentage (1-99)');
+                return;
+            }
+            
+            localStorage.setItem('bodyweight', bodyweight);
+            localStorage.setItem('bodyfat', bodyfat);
+            
+            // Calculate Lean Body Mass (LBM)
+            const fatMass = bodyweight * (bodyfat / 100);
+            const lbm = Math.round(bodyweight - fatMass);
+            
+            // Display LBM
+            document.getElementById('lbmValue').textContent = lbm;
+            document.getElementById('lbmDisplay').style.display = 'block';
+            
+            // Protein based on LBM (1g per lb of lean mass)
+            const protein = lbm;
+            
+            // Calorie multipliers based on LBM and goal
+            let trainCalMultiplier, restCalMultiplier;
+            
+            if (goal === 'cut') {
+                // Aggressive cut for fat loss
+                trainCalMultiplier = 14;  // Moderate surplus on training days
+                restCalMultiplier = 10;   // Aggressive deficit on rest days
+            } else if (goal === 'recomp') {
+                // Maintenance with cycling
+                trainCalMultiplier = 16;  // Surplus on training
+                restCalMultiplier = 12;   // Deficit on rest
+            } else { // bulk
+                // Muscle gain
+                trainCalMultiplier = 18;
+                restCalMultiplier = 14;
+            }
+            
+            // Calculate total calories based on LBM
+            const trainCals = Math.round(lbm * trainCalMultiplier);
+            const restCals = Math.round(lbm * restCalMultiplier);
+            
+            // Training day macros: high carb, low fat
+            const trainProteinCals = protein * 4;
+            const trainFatCals = Math.round(trainCals * 0.20); // 20% fat
+            const trainCarbCals = trainCals - trainProteinCals - trainFatCals;
+            
+            const trainFat = Math.round(trainFatCals / 9);
+            const trainCarbs = Math.round(trainCarbCals / 4);
+            
+            // Rest day macros: low carb, higher fat
+            const restProteinCals = protein * 4;
+            const restFatCals = Math.round(restCals * 0.45); // 45% fat
+            const restCarbCals = restCals - restProteinCals - restFatCals;
+            
+            const restFat = Math.round(restFatCals / 9);
+            const restCarbs = Math.round(restCarbCals / 4);
+            
+            // Display results
+            document.getElementById('trainCalories').textContent = trainCals;
+            document.getElementById('trainProtein').textContent = `${protein}g`;
+            document.getElementById('trainCarbs').textContent = `${trainCarbs}g`;
+            document.getElementById('trainFat').textContent = `${trainFat}g`;
+            
+            document.getElementById('restCalories').textContent = restCals;
+            document.getElementById('restProtein').textContent = `${protein}g`;
+            document.getElementById('restCarbs').textContent = `${restCarbs}g`;
+            document.getElementById('restFat').textContent = `${restFat}g`;
+            
+            document.getElementById('macroResults').style.display = 'block';
+        }
+
+        // Initialize
+        loadData();
+    </script>
+</body>
+</html>
